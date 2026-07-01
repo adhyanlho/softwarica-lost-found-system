@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+
+{% block title %}Register - Lost & Found Portal{% endblock %}
+
+{% block content %}
+    <h3>Create a New Account</h3>
+    
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul style="color: red;">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.register_route') }}">
+        <div>
+            <label>Full Name:</label>
+            <input type="text" name="fullname" required>
+        </div>
+        <br>
+        <div>
+            <label>Email Address:</label>
+            <input type="email" name="email" required>
+        </div>
+        <br>
+        <div>
+            <label>Password (Min 8 characters):</label>
+            <input type="password" name="password" required>
+        </div>
+        <br>
+        <button type="submit">Sign Up</button>
+    </form>
+{% endblock %}

@@ -15,10 +15,10 @@
         {% endif %}
     {% endwith %}
 
-    <form method="POST" action="{{ url_for('auth.login_route') }}">
+    <form method="POST" action="{{ url_for('auth.login') }}">
         <div>
-            <label>Email Address:</label>
-            <input type="email" name="email" required>
+            <label>Username:</label>
+            <input type="text" name="username" required>
         </div>
         <br>
         <div>
@@ -29,5 +29,5 @@
         <button type="submit">Log In</button>
     </form>
     <br>
-    <p>Don't have an account? <a href="{{ url_for('auth.register_route') }}">Register here</a>.</p>
+    <p>Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a>.</p>
 {% endblock %}

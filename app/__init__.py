@@ -6,12 +6,14 @@ def create_app():
     app.config.from_object(Config)
 
     from app.routes.auth import auth_bp
+    from app.routes.main import main_bp
     app.register_blueprint(auth_bp, url_prefix="/auth")
+    app.register_blueprint(main_bp)
 
     @app.route("/")
     def index():
         if "user_id" in session:
-            return redirect(url_for("auth.login"))
+            return redirect(url_for("main.dashboard"))
         return redirect(url_for("auth.login"))
 
     return app

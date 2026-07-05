@@ -1,4 +1,4 @@
-from flask import flash, redirect, render_template, request, url_for
+from flask import flash, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.database import get_connection
@@ -69,8 +69,9 @@ def login():
             connection.close()
 
         if user and check_password_hash(user["password_hash"], password):
+            session["user_id"] = user["id"]
             flash("Login successful.")
-            return redirect(url_for("auth.login"))
+            return redirect(url_for("main.dashboard"))
 
         flash("Invalid username or password.")
         return render_template("login.html")

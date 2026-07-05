@@ -3,5 +3,372 @@
 {% block title %}Dashboard - Lost & Found Portal{% endblock %}
 
 {% block content %}
-    <h3>Dashboard</h3>
+<style>
+    main {
+        width: min(1180px, calc(100% - 32px));
+        margin: 28px auto 44px;
+        padding: 0;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    main:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .dashboard-page {
+        display: grid;
+        gap: 22px;
+    }
+
+    .dashboard-panel {
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid rgba(219, 228, 240, 0.95);
+        border-radius: 18px;
+        box-shadow: 0 20px 48px rgba(15, 23, 42, 0.13);
+    }
+
+    .dashboard-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 22px;
+        padding: 28px;
+    }
+
+    .dashboard-kicker {
+        margin-bottom: 8px;
+        color: #2563eb;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .dashboard-title {
+        margin: 0;
+        color: #111827;
+        font-size: clamp(1.7rem, 3vw, 2.35rem);
+        line-height: 1.12;
+        font-weight: 850;
+        letter-spacing: 0;
+    }
+
+    .dashboard-subtitle,
+    .status-summary {
+        color: #475467;
+        font-size: 0.98rem;
+    }
+
+    .dashboard-subtitle {
+        margin-top: 10px;
+        max-width: 660px;
+    }
+
+    .status-summary {
+        min-width: 245px;
+        padding: 16px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+    }
+
+    .status-summary strong {
+        display: block;
+        margin-bottom: 4px;
+        color: #111827;
+        font-size: 1rem;
+    }
+
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .metric-card {
+        padding: 22px;
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid rgba(219, 228, 240, 0.95);
+        border-radius: 16px;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
+    }
+
+    .metric-label {
+        color: #475467;
+        font-size: 0.92rem;
+        font-weight: 750;
+    }
+
+    .metric-value {
+        margin-top: 10px;
+        color: #111827;
+        font-size: 2.2rem;
+        line-height: 1;
+        font-weight: 900;
+    }
+
+    .metric-note {
+        margin-top: 10px;
+        color: #667085;
+        font-size: 0.9rem;
+    }
+
+    .dashboard-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 18px;
+    }
+
+    .dashboard-search {
+        flex: 1;
+        min-width: 220px;
+    }
+
+    .dashboard-search input {
+        min-height: 52px;
+        background: #ffffff;
+        border-color: #cbd5e1;
+    }
+
+    .report-button {
+        width: auto;
+        min-width: 178px;
+        min-height: 52px;
+        margin: 0;
+        white-space: nowrap;
+    }
+
+    .table-panel {
+        overflow: hidden;
+    }
+
+    .table-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 22px 24px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .table-header h3 {
+        margin: 0;
+        color: #111827;
+        font-size: 1.15rem;
+        font-weight: 850;
+    }
+
+    .table-header span {
+        color: #667085;
+        font-size: 0.92rem;
+    }
+
+    .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .items-table {
+        width: 100%;
+        min-width: 760px;
+        border-collapse: collapse;
+        color: #111827;
+    }
+
+    .items-table th,
+    .items-table td {
+        padding: 16px 24px;
+        text-align: left;
+        border-bottom: 1px solid #edf2f7;
+        vertical-align: middle;
+    }
+
+    .items-table th {
+        color: #475467;
+        background: #f8fafc;
+        font-size: 0.78rem;
+        font-weight: 850;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .items-table td {
+        font-size: 0.95rem;
+    }
+
+    .item-name {
+        font-weight: 800;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 4px 11px;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 850;
+    }
+
+    .status-lost {
+        color: #991b1b;
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+    }
+
+    .status-found {
+        color: #166534;
+        background: #dcfce7;
+        border: 1px solid #bbf7d0;
+    }
+
+    .status-reclaimed {
+        color: #1e40af;
+        background: #dbeafe;
+        border: 1px solid #bfdbfe;
+    }
+
+    .table-action {
+        color: #1d4ed8;
+        font-weight: 850;
+    }
+
+    @media (max-width: 860px) {
+        .dashboard-header,
+        .dashboard-toolbar,
+        .table-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .status-summary {
+            min-width: 0;
+        }
+
+        .metrics-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .report-button {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 520px) {
+        main {
+            width: calc(100% - 24px);
+            margin-top: 18px;
+        }
+
+        .dashboard-header,
+        .metric-card,
+        .dashboard-toolbar,
+        .table-header {
+            padding: 18px;
+        }
+    }
+</style>
+
+<section class="dashboard-page" aria-label="Lost and found dashboard">
+    <div class="dashboard-panel dashboard-header">
+        <div>
+            <p class="dashboard-kicker">Dashboard</p>
+            <h1 class="dashboard-title">Welcome back, {{ session.get("username", "User") }}!</h1>
+            <p class="dashboard-subtitle">
+                Track reports, review unclaimed finds, and move reclaimed items through the Softwarica Lost & Found workflow.
+            </p>
+        </div>
+        <aside class="status-summary" aria-label="Current status summary">
+            <strong id="dashboard-date">Today</strong>
+            <span>System status: 20 open cases need review.</span>
+        </aside>
+    </div>
+
+    <section class="metrics-grid" aria-label="Report metrics">
+        <article class="metric-card">
+            <div class="metric-label">Active Lost Reports</div>
+            <div class="metric-value">12</div>
+            <div class="metric-note">Awaiting possible owner matches</div>
+        </article>
+        <article class="metric-card">
+            <div class="metric-label">Items Found &amp; Unclaimed</div>
+            <div class="metric-value">8</div>
+            <div class="metric-note">Stored with campus security</div>
+        </article>
+        <article class="metric-card">
+            <div class="metric-label">Successfully Reclaimed</div>
+            <div class="metric-value">45</div>
+            <div class="metric-note">Returned to verified owners</div>
+        </article>
+    </section>
+
+    <section class="dashboard-panel dashboard-toolbar" aria-label="Dashboard actions">
+        <div class="dashboard-search">
+            <label for="dashboard-search-input">Search items</label>
+            <input id="dashboard-search-input" type="search" placeholder="Search by keyword, category...">
+        </div>
+        <button class="report-button" type="button">+ Report New Item</button>
+    </section>
+
+    <section class="dashboard-panel table-panel" aria-label="Recent items">
+        <div class="table-header">
+            <h3>Recent Items</h3>
+            <span>Latest activity from lost and found reports</span>
+        </div>
+        <div class="table-wrap">
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Category</th>
+                        <th>Date Found/Lost</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="item-name">Black Dell Laptop Bag</td>
+                        <td>Electronics</td>
+                        <td>Jul 4, 2026</td>
+                        <td><span class="status-badge status-lost">Lost</span></td>
+                        <td><a class="table-action" href="#">View</a></td>
+                    </tr>
+                    <tr>
+                        <td class="item-name">Student ID Card</td>
+                        <td>Identity</td>
+                        <td>Jul 3, 2026</td>
+                        <td><span class="status-badge status-found">Found</span></td>
+                        <td><a class="table-action" href="#">Review</a></td>
+                    </tr>
+                    <tr>
+                        <td class="item-name">Blue Hydro Flask</td>
+                        <td>Personal Item</td>
+                        <td>Jul 1, 2026</td>
+                        <td><span class="status-badge status-reclaimed">Reclaimed</span></td>
+                        <td><a class="table-action" href="#">Details</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</section>
+
+<script>
+    const dateElement = document.getElementById("dashboard-date");
+
+    if (dateElement) {
+        dateElement.textContent = new Intl.DateTimeFormat("en", {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+        }).format(new Date());
+    }
+</script>
 {% endblock %}

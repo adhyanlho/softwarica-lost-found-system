@@ -370,7 +370,7 @@
                         <td>{{ item.category }}</td>
                         <td>{{ item.created_at.strftime('%b %d, %Y') if item.created_at else 'Recent' }}</td>
                         <td><span class="status-badge {{ item.status }}">{{ item.status | capitalize }}</span></td>
-                        <td><a href="#" class="btn-view">View</a></td>
+                        <td><a href="{{ url_for('main.view_item', item_id=item.id) }}" class="btn-view">View</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>

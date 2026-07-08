@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; margin: 40px auto; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px; backdrop-filter: blur(10px); color: white;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px;">
+        <h2>Item Details</h2>
+        <a href="{{ url_for('main.dashboard') }}" style="color: #3b82f6; text-decoration: none;">&larr; Back to Dashboard</a>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div style="background-color: #ef4444; color: white; padding: 10px; border-radius: 6px; margin-bottom: 15px;">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div style="margin-bottom: 15px;">
+        <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af;">Item Name</span>
+        <h3 style="margin: 5px 0 0 0; color: #f3f4f6;">{{ item.title }}</h3>
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af;">Description</span>
+        <p style="margin: 5px 0 0 0; color: #d1d5db; line-height: 1.6;">{{ item.description }}</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+        <div>
+            <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af;">Category</span>
+            <div style="margin-top: 5px; color: #f3f4f6;">{{ item.category }}</div>
+        </div>
+        <div>
+            <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af;">Status</span>
+            <div style="margin-top: 5px;"><span class="status-badge {{ item.status }}">{{ item.status | capitalize }}</span></div>
+        </div>
+        <div>
+            <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af;">Location Lost/Found</span>
+            <div style="margin-top: 5px; color: #f3f4f6;">{{ item.location }}</div>
+        </div>
+        <div>
+            <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af;">Reported By</span>
+            <div style="margin-top: 5px; color: #f3f4f6;">{{ item.reporter_name }}</div>
+        </div>
+    </div>
+
+    {% if is_owner and item.status != 'claimed' %}
+    <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; text-align: right;">
+        <form action="{{ url_for('main.reclaim_item', item_id=item.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to mark this item as reclaimed?');">
+            <button type="submit" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s;">
+                ✓ Mark as Reclaimed
+            </button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

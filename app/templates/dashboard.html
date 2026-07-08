@@ -136,6 +136,9 @@
     }
 
     .report-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         width: auto;
         min-width: 178px;
         min-height: 52px;
@@ -221,7 +224,19 @@
         border: 1px solid #fecaca;
     }
 
+    .lost {
+        color: #991b1b;
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+    }
+
     .status-found {
+        color: #166534;
+        background: #dcfce7;
+        border: 1px solid #bbf7d0;
+    }
+
+    .found {
         color: #166534;
         background: #dcfce7;
         border: 1px solid #bbf7d0;
@@ -239,7 +254,18 @@
         border: 1px solid #bfdbfe;
     }
 
+    .claimed {
+        color: #1e40af;
+        background: #dbeafe;
+        border: 1px solid #bfdbfe;
+    }
+
     .table-action {
+        color: #1d4ed8;
+        font-weight: 850;
+    }
+
+    .btn-view {
         color: #1d4ed8;
         font-weight: 850;
     }
@@ -284,7 +310,7 @@
     <div class="dashboard-panel dashboard-header">
         <div>
             <p class="dashboard-kicker">Dashboard</p>
-            <h1 class="dashboard-title">Welcome back, {{ username }}!</h1>
+            <h1 class="dashboard-title">Welcome back, {{ username or 'User' }}!</h1>
             <p class="dashboard-subtitle">
                 Track reports, review unclaimed finds, and move reclaimed items through the Softwarica Lost & Found workflow.
             </p>
@@ -318,7 +344,7 @@
             <label for="dashboard-search-input">Search items</label>
             <input id="dashboard-search-input" type="search" placeholder="Search by keyword, category...">
         </div>
-        <button class="report-button" type="button">+ Report New Item</button>
+        <a class="report-button" href="{{ url_for('main.report') }}">+ Report New Item</a>
     </section>
 
     <section class="dashboard-panel table-panel" aria-label="Recent items">
@@ -340,15 +366,11 @@
                 <tbody>
                     {% for item in items %}
                     <tr>
-                        <td class="item-name">{{ item.title }}</td>
-                        <td>{{ item.category or "Other" }}</td>
-                        <td>{{ item.created_at.strftime("%b %d, %Y") if item.created_at else "N/A" }}</td>
-                        <td><span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span></td>
-                        <td><a class="table-action" href="#">View</a></td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5">No reported items yet.</td>
+                        <td>{{ item.title }}</td>
+                        <td>{{ item.category }}</td>
+                        <td>{{ item.created_at.strftime('%b %d, %Y') if item.created_at else 'Recent' }}</td>
+                        <td><span class="status-badge {{ item.status }}">{{ item.status | capitalize }}</span></td>
+                        <td><a href="#" class="btn-view">View</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>

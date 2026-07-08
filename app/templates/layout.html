@@ -11,8 +11,13 @@
     <header>
         <h2>Softwarica Lost & Found Portal</h2>
         <nav>
-            <a href="{{ url_for('auth.login') }}">Login</a> | 
-            <a href="{{ url_for('auth.register') }}">Register</a>
+            {% if session.get('user_id') %}
+                <span class="nav-text" style="color: white; margin-right: 15px;">Logged in as: <strong>{{ session.get('username') or 'User' }}</strong></span>
+                <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn-login">Login</a>
+                <a href="{{ url_for('auth.register') }}" class="btn-register">Register</a>
+            {% endif %}
         </nav>
     </header>
     <hr>

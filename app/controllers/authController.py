@@ -70,6 +70,7 @@ def login():
 
         if user and check_password_hash(user["password_hash"], password):
             session["user_id"] = user["id"]
+            session["username"] = user["username"]
             flash("Login successful.")
             return redirect(url_for("main.dashboard"))
 
@@ -77,3 +78,9 @@ def login():
         return render_template("login.html")
 
     return render_template("login.html")
+
+
+def logout():
+    session.clear()
+    flash("You have been logged out.")
+    return redirect(url_for("auth.login"))

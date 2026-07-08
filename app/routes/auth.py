@@ -14,3 +14,9 @@ def register():
 def login():
     from app.controllers.authController import login as login_controller
     return login_controller()
+
+
+@auth_bp.route('/logout')
+def logout():
+    from app.controllers.authController import logout as logout_controller
+    return logout_controller()

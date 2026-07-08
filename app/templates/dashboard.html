@@ -307,6 +307,17 @@
 </style>
 
 <section class="dashboard-page" aria-label="Lost and found dashboard">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div style="background-color: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+            ✓ {{ message }}
+          </div>
+        ```html
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
     <div class="dashboard-panel dashboard-header">
         <div>
             <p class="dashboard-kicker">Dashboard</p>

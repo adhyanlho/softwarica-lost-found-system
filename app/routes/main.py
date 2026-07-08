@@ -89,3 +89,77 @@ def report():
         return redirect(url_for("main.dashboard"))
 
     return render_template("report.html")
+@main_bp.route("/item/<int:item_id>")
+def view_item(item_id):
+    if "user_id" not in session:
+        return redirect(url_for("auth.login"))
+
+    connection = get_connection()
+    if connection is None:
+        flash("Database connection error.")
+        return redirect(url_for("main.dashboard"))
+
+    cursor = connection.cursor(dictionary=True)
+    try:
+        # Fetch item details along with the reporter's username via a JOIN
+        cursor.execute(
+            """
+            SELECT items.*, users.username AS reporter_name 
+            FROM items 
+            JOIN users ON items.user_id = users.id 
+            WHERE items.id = %s
+            """,
+            (item_id,),
+        )
+        item = cursor.fetchone()
+    finally:
+        cursor.close()
+        connection.close()
+
+    if not item:
+        flash("Item not found.")
+        return redirect(url_for("main.dashboard"))
+
+    # Security check passed down to frontend template context
+    is_owner = item["user_id"] == session["user_id"]
+
+    return render_template("view_item.html", item=item, is_owner=is_owner)
+
+
+@main_bp.route("/item/<int:item_id>/reclaim", methods=["POST"])
+def reclaim_item(item_id):
+    if "user_id" not in session:
+        return redirect(url_for("auth.login"))
+
+    connection = get_connection()
+    if connection is None:
+        flash("Database connection error.")
+        return redirect(url_for("main.dashboard"))
+
+    cursor = connection.cursor(dictionary=True)
+    try:
+        # CRITICAL: Fetch the owner id on the server backend to avoid tamper tricks
+        cursor.execute("SELECT user_id FROM items WHERE id = %s", (item_id,))
+        item = cursor.fetchone()
+
+        if not item:
+            flash("Item not found.")
+            return redirect(url_for("main.dashboard"))
+
+        # SECURE AUTHORIZATION CHECK: Prevent IDOR attempts completely
+        if item["user_id"] != session["user_id"]:
+            flash("Access denied. You do not own this record.")
+            return redirect(url_for("main.dashboard")), 403
+
+        # Update the status to 'claimed' securely
+        cursor.execute(
+            "UPDATE items SET status = 'claimed' WHERE id = %s",
+            (item_id,),
+        )
+        connection.commit()
+        flash("Item successfully updated to Reclaimed!")
+    finally:
+        cursor.close()
+        connection.close()
+
+    return redirect(url_for("main.dashboard"))

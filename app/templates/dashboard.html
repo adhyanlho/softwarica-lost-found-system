@@ -233,6 +233,12 @@
         border: 1px solid #bfdbfe;
     }
 
+    .status-claimed {
+        color: #1e40af;
+        background: #dbeafe;
+        border: 1px solid #bfdbfe;
+    }
+
     .table-action {
         color: #1d4ed8;
         font-weight: 850;
@@ -278,31 +284,31 @@
     <div class="dashboard-panel dashboard-header">
         <div>
             <p class="dashboard-kicker">Dashboard</p>
-            <h1 class="dashboard-title">Welcome back, {{ session.get("username", "User") }}!</h1>
+            <h1 class="dashboard-title">Welcome back, {{ username }}!</h1>
             <p class="dashboard-subtitle">
                 Track reports, review unclaimed finds, and move reclaimed items through the Softwarica Lost & Found workflow.
             </p>
         </div>
         <aside class="status-summary" aria-label="Current status summary">
             <strong id="dashboard-date">Today</strong>
-            <span>System status: 20 open cases need review.</span>
+            <span>System status: {{ open_count }} open cases need review.</span>
         </aside>
     </div>
 
     <section class="metrics-grid" aria-label="Report metrics">
         <article class="metric-card">
             <div class="metric-label">Active Lost Reports</div>
-            <div class="metric-value">12</div>
+            <div class="metric-value">{{ lost_count }}</div>
             <div class="metric-note">Awaiting possible owner matches</div>
         </article>
         <article class="metric-card">
             <div class="metric-label">Items Found &amp; Unclaimed</div>
-            <div class="metric-value">8</div>
+            <div class="metric-value">{{ found_count }}</div>
             <div class="metric-note">Stored with campus security</div>
         </article>
         <article class="metric-card">
             <div class="metric-label">Successfully Reclaimed</div>
-            <div class="metric-value">45</div>
+            <div class="metric-value">{{ claimed_count }}</div>
             <div class="metric-note">Returned to verified owners</div>
         </article>
     </section>
@@ -332,27 +338,19 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% for item in items %}
                     <tr>
-                        <td class="item-name">Black Dell Laptop Bag</td>
-                        <td>Electronics</td>
-                        <td>Jul 4, 2026</td>
-                        <td><span class="status-badge status-lost">Lost</span></td>
+                        <td class="item-name">{{ item.title }}</td>
+                        <td>{{ item.category or "Other" }}</td>
+                        <td>{{ item.created_at.strftime("%b %d, %Y") if item.created_at else "N/A" }}</td>
+                        <td><span class="status-badge status-{{ item.status }}">{{ item.status|title }}</span></td>
                         <td><a class="table-action" href="#">View</a></td>
                     </tr>
+                    {% else %}
                     <tr>
-                        <td class="item-name">Student ID Card</td>
-                        <td>Identity</td>
-                        <td>Jul 3, 2026</td>
-                        <td><span class="status-badge status-found">Found</span></td>
-                        <td><a class="table-action" href="#">Review</a></td>
+                        <td colspan="5">No reported items yet.</td>
                     </tr>
-                    <tr>
-                        <td class="item-name">Blue Hydro Flask</td>
-                        <td>Personal Item</td>
-                        <td>Jul 1, 2026</td>
-                        <td><span class="status-badge status-reclaimed">Reclaimed</span></td>
-                        <td><a class="table-action" href="#">Details</a></td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>

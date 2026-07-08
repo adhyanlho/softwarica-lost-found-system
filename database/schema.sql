@@ -4,6 +4,7 @@ USE lost_and_found;
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS items;
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -11,6 +12,18 @@ CREATE TABLE users (
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    description TEXT,
+    category VARCHAR(50),
+    status ENUM('lost', 'found', 'claimed') DEFAULT 'lost',
+    location VARCHAR(255),
+    user_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 SET FOREIGN_KEY_CHECKS = 1;

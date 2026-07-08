@@ -1,0 +1,109 @@
+{% extends 'layout.html' %}
+
+{% block title %}Report Item - Lost & Found Portal{% endblock %}
+
+{% block content %}
+<style>
+    .report-container {
+        background: rgba(255, 255, 255, 0.96);
+        color: #1a202c;
+        padding: 2.5rem;
+        border-radius: 12px;
+        max-width: 600px;
+        margin: 2rem auto;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .report-container h1 {
+        margin: 0 0 1.5rem;
+        font-size: 1.75rem;
+        color: #1a202c;
+    }
+
+    .report-field {
+        margin-bottom: 1.25rem;
+    }
+
+    .report-field label {
+        display: block;
+        margin-bottom: 0.4rem;
+        color: #1a202c;
+        font-weight: 700;
+    }
+
+    .report-field input,
+    .report-field select,
+    .report-field textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.75rem;
+        border: 1px solid #cbd5e0;
+        border-radius: 8px;
+        color: #1a202c;
+        background: #ffffff;
+        font: inherit;
+    }
+
+    .report-field textarea {
+        resize: vertical;
+    }
+
+    .report-submit {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 0;
+        border-radius: 8px;
+        background: #2563eb;
+        color: #ffffff;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .report-submit:hover {
+        background: #1d4ed8;
+    }
+</style>
+
+<section class="report-container" aria-label="Report lost or found item">
+    <h1>Report an Item</h1>
+
+    <form method="POST" action="{{ url_for('main.report') }}">
+        <div class="report-field">
+            <label for="title">Item Name / Title</label>
+            <input id="title" type="text" name="title" required>
+        </div>
+
+        <div class="report-field">
+            <label for="category">Category</label>
+            <select id="category" name="category" required>
+                <option value="Electronics">Electronics</option>
+                <option value="Keys">Keys</option>
+                <option value="Wallets & Documents">Wallets &amp; Documents</option>
+                <option value="Clothing">Clothing</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <div class="report-field">
+            <label for="status">Status</label>
+            <select id="status" name="status" required>
+                <option value="lost">lost</option>
+                <option value="found">found</option>
+            </select>
+        </div>
+
+        <div class="report-field">
+            <label for="location">Location</label>
+            <input id="location" type="text" name="location" placeholder="e.g., Block A Lab 2" required>
+        </div>
+
+        <div class="report-field">
+            <label for="description">Detailed Description</label>
+            <textarea id="description" name="description" rows="4"></textarea>
+        </div>
+
+        <button class="report-submit" type="submit">Submit Report</button>
+    </form>
+</section>
+{% endblock %}

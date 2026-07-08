@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, redirect, session, url_for
 
 
 auth_bp = Blueprint('auth', __name__)
@@ -18,5 +18,5 @@ def login():
 
 @auth_bp.route('/logout')
 def logout():
-    from app.controllers.authController import logout as logout_controller
-    return logout_controller()
+    session.clear()
+    return redirect(url_for('auth.login'))

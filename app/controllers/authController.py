@@ -12,27 +12,40 @@ def register():
         confirm_password = request.form.get("confirm_password", "")
 
         if not username or not email or not password or not confirm_password:
-            flash("All fields are required.")
+            flash("All fields are required.", "error") # Added category
             return render_template("register.html")
 
         if password != confirm_password:
-            flash("Passwords do not match.")
+            flash("Passwords do not match.", "error") # Added category
             return render_template("register.html")
 
         password_hash = generate_password_hash(password)
 
         connection = get_connection()
         if connection is None:
-            flash("Database connection failed. Please try again.")
+            flash("Database connection failed.", "error")
             return render_template("register.html")
 
         cursor = connection.cursor()
         try:
+            # --- ADD THIS PRE-CHECK BLOCK ---
+            cursor.execute("SELECT id FROM users WHERE username = %s OR email = %s", (username, email))
+            existing_user = cursor.fetchone()
+            
+            if existing_user:
+                flash("Username or Email already exists.", "error")
+                return render_template("register.html")
+            # -------------------------------
+
             cursor.execute(
                 "INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s)",
                 (username, email, password_hash),
             )
             connection.commit()
+        except Exception as e:
+            # Handle potential DB errors gracefully
+            flash("An error occurred during registration. Please try again.", "error")
+            return render_template("register.html")
         finally:
             cursor.close()
             connection.close()

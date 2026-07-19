@@ -92,6 +92,11 @@
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
+    .form-group input[type="file"] {
+        padding: 10px;
+        cursor: pointer;
+    }
+
     .form-group textarea {
         min-height: 120px;
         resize: vertical;
@@ -192,7 +197,8 @@
             <p class="report-subtitle">Fill out the details below to log a lost or found item.</p>
         </div>
 
-        <form action="{{ url_for('main.report') }}" method="POST" aria-label="Item report form">
+        <!-- Added enctype="multipart/form-data" to support standard file stream parsing blocks -->
+        <form action="{{ url_for('main.report') }}" method="POST" enctype="multipart/form-data" aria-label="Item report form">
             
             <div class="form-group">
                 <label for="title">Item Name / Title</label>
@@ -225,6 +231,12 @@
             <div class="form-group">
                 <label for="location">Location</label>
                 <input type="text" id="location" name="location" placeholder="e.g., Block A Lab 2, Cafeteria Counter" required>
+            </div>
+
+            <!-- New Image Upload Selector Field Element Component -->
+            <div class="form-group">
+                <label for="image">Item Photo (Optional)</label>
+                <input type="file" id="image" name="image" accept="image/*">
             </div>
 
             <div class="form-group">

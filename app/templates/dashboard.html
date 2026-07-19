@@ -135,6 +135,44 @@
         border-color: #cbd5e1;
     }
 
+    .dashboard-filter-select {
+        min-height: 52px;
+        padding: 0 16px;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        color: #111827;
+        font-size: 0.95rem;
+        cursor: pointer;
+        outline: none;
+    }
+
+    .btn-filter {
+        background: #2563eb;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+        transition: background 0.2s ease;
+    }
+
+    .btn-filter:hover {
+        background: #1d4ed8;
+    }
+
+    .btn-clear {
+        background: #f1f5f9;
+        color: #475467;
+        border: 1px solid #cbd5e1;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background 0.2s ease;
+    }
+
+    .btn-clear:hover {
+        background: #e2e8f0;
+    }
+
     .report-button {
         display: inline-flex;
         align-items: center;
@@ -289,6 +327,13 @@
         .report-button {
             width: 100%;
         }
+        
+        .dashboard-filter-select,
+        .btn-filter,
+        .btn-clear {
+            width: 100%;
+            min-height: 52px;
+        }
     }
 
     @media (max-width: 520px) {
@@ -313,7 +358,6 @@
           <div style="background-color: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-weight: 500; display: flex; align-items: center; gap: 8px;">
             ✓ {{ message }}
           </div>
-        ```html
         {% endfor %}
       {% endif %}
     {% endwith %}
@@ -350,13 +394,29 @@
         </article>
     </section>
 
-    <section class="dashboard-panel dashboard-toolbar" aria-label="Dashboard actions">
+    <!-- Wrapped toolbar components inside a GET form targeting the dashboard route -->
+    <form class="dashboard-panel dashboard-toolbar" action="{{ url_for('main.dashboard') }}" method="GET" aria-label="Dashboard actions">
         <div class="dashboard-search">
-            <label for="dashboard-search-input">Search items</label>
-            <input id="dashboard-search-input" type="search" placeholder="Search by keyword, category...">
+            <label for="dashboard-search-input" style="display: none;">Search items</label>
+            <input id="dashboard-search-input" type="search" name="search" value="{{ search_query or '' }}" placeholder="Search by keyword, details...">
         </div>
+
+        <select name="category" class="dashboard-filter-select">
+            <option value="all" {% if category_filter == 'all' or not category_filter %}selected{% endif %}>All Categories</option>
+            <option value="Electronics" {% if category_filter == 'Electronics' %}selected{% endif %}>Electronics</option>
+            <option value="Clothing" {% if category_filter == 'Clothing' %}selected{% endif %}>Clothing</option>
+            <option value="Books" {% if category_filter == 'Books' %}selected{% endif %}>Books & Documents</option>
+            <option value="Keys" {% if category_filter == 'Keys' %}selected{% endif %}>Keys & Essentials</option>
+        </select>
+
+        <button type="submit" class="report-button btn-filter">🔍 Filter</button>
+
+        {% if search_query or (category_filter and category_filter != 'all') %}
+            <a href="{{ url_for('main.dashboard') }}" class="report-button btn-clear">Clear</a>
+        {% endif %}
+
         <a class="report-button" href="{{ url_for('main.report') }}">+ Report New Item</a>
-    </section>
+    </form>
 
     <section class="dashboard-panel table-panel" aria-label="Recent items">
         <div class="table-header">
@@ -377,13 +437,20 @@
                 <tbody>
                     {% for item in items %}
                     <tr>
-                        <td>{{ item.title }}</td>
+                        <td class="item-name">{{ item.title }}</td>
                         <td>{{ item.category }}</td>
                         <td>{{ item.created_at.strftime('%b %d, %Y') if item.created_at else 'Recent' }}</td>
                         <td><span class="status-badge {{ item.status }}">{{ item.status | capitalize }}</span></td>
                         <td><a href="{{ url_for('main.view_item', item_id=item.id) }}" class="btn-view">View</a></td>
                     </tr>
                     {% endfor %}
+                    {% if not items %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #667085; padding: 32px;">
+                            No matching items found for your search criteria.
+                        </td>
+                    </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>

@@ -25,5 +25,29 @@
     <main>
         {% block content %}{% endblock %}
     </main>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Select all flash message alert elements
+        const alerts = document.querySelectorAll('.flash-alert');
+        
+        alerts.forEach(alert => {
+            // Wait 3 seconds (3000ms) before starting the fade out
+            setTimeout(() => {
+                // Apply a smooth transitions wrapper effect
+                alert.style.transition = 'opacity 0.6s ease, transform 0.6s ease, max-height 0.6s ease, margin 0.6s ease, padding 0.6s ease';
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-12px)';
+                alert.style.maxHeight = '0px';
+                alert.style.margin = '0px';
+                alert.style.padding = '0px';
+                
+                // Completely drop the element from the DOM layout hierarchy after animation completes
+                setTimeout(() => {
+                    alert.remove();
+                }, 600);
+            }, 3000);
+        });
+    });
+</script>
 </body>
 </html>

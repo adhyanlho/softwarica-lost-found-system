@@ -5,13 +5,21 @@
 {% block content %}
     <h3>Create a New Account</h3>
     
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <ul style="color: red;">
-            {% for message in messages %}
-                <li>{{ message }}</li>
+            {% for category, message in messages %}
+                {% if category == 'success' %}
+                    <!-- Green Success Box -->
+                    <ul class="flash-alert" style="background-color: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #047857; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; list-style-type: none; padding-left: 16px;">
+                        <li style="font-weight: 500;">✓ {{ message }}</li>
+                    </ul>
+                {% else %}
+                    <!-- Red Error Box -->
+                    <ul class="flash-alert" style="background-color: #fee2e2; border: 1px solid #f87171; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; list-style-type: none; padding-left: 16px;">
+                        <li style="font-weight: 500;">⚠️ {{ message }}</li>
+                    </ul>
+                {% endif %}
             {% endfor %}
-            </ul>
         {% endif %}
     {% endwith %}
 

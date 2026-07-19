@@ -184,9 +184,9 @@
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         {% for message in messages %}
-          <div style="background-color: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #f87171; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-weight: 500;">
-            ⚠️ {{ message }}
-          </div>
+            <div class="flash-alert" style="background-color: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #f87171; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-weight: 500;">
+                ⚠️ {{ message }}
+            </div>
         {% endfor %}
       {% endif %}
     {% endwith %}

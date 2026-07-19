@@ -355,9 +355,9 @@
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         {% for message in messages %}
-          <div style="background-color: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+          <div class="flash-alert" style="background-color: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #047857; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-weight: 500;">
             ✓ {{ message }}
-          </div>
+        </div>
         {% endfor %}
       {% endif %}
     {% endwith %}

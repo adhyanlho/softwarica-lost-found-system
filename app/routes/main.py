@@ -1,7 +1,8 @@
+import os
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from werkzeug.utils import secure_filename
 
 from app.database import get_connection
-
 
 main_bp = Blueprint("main", __name__)
 
@@ -28,13 +29,11 @@ def dashboard():
             open_count=0,
         )
 
-    # 1. Capture search input strings and category filters from the GET query parameters
     search_query = request.args.get("search", "").strip()
     category_filter = request.args.get("category", "").strip()
 
     cursor = connection.cursor(dictionary=True)
     try:
-        # Fetch logged-in user details
         cursor.execute(
             "SELECT username FROM users WHERE id = %s",
             (user_id,),
@@ -43,14 +42,12 @@ def dashboard():
         if user:
             username = user["username"]
 
-        # 2. Fetch global statuses independently so card metrics stay accurate during searches
         cursor.execute("SELECT status FROM items")
         stats_data = cursor.fetchall()
         lost_count = sum(1 for item in stats_data if item["status"] == "lost")
         found_count = sum(1 for item in stats_data if item["status"] == "found")
         claimed_count = sum(1 for item in stats_data if item["status"] == "claimed")
 
-        # 3. Construct the dynamic search and filter SQL query
         query_string = "SELECT * FROM items WHERE 1=1"
         query_params = []
 
@@ -64,7 +61,6 @@ def dashboard():
 
         query_string += " ORDER BY created_at DESC"
 
-        # Execute filtered query
         cursor.execute(query_string, tuple(query_params))
         items = cursor.fetchall()
         
@@ -80,8 +76,8 @@ def dashboard():
         found_count=found_count,
         claimed_count=claimed_count,
         open_count=lost_count + found_count,
-        search_query=search_query,        # Passed to keep frontend input text sticky
-        category_filter=category_filter   # Passed to keep frontend dropdown sticky
+        search_query=search_query,
+        category_filter=category_filter
     )
 
 
@@ -96,16 +92,33 @@ def report():
         category = request.form.get("category")
         status = request.form.get("status")
         location = request.form.get("location")
+        
+        # 1. Capture the uploaded file object from the form payload
+        image_file = request.files.get("image")
+        image_url = None
+
+        if image_file and image_file.filename != "":
+            filename = secure_filename(image_file.filename)
+            
+            # Ensure the target static media uploads directory exists
+            upload_dir = os.path.join("app", "static", "uploads")
+            if not os.path.exists(upload_dir):
+                os.makedirs(upload_dir)
+            
+            # Save raw bytes securely onto system disk storage
+            image_file.save(os.path.join(upload_dir, filename))
+            image_url = f"uploads/{filename}"
 
         connection = get_connection()
         cursor = connection.cursor()
         try:
+            # 2. Updated INSERT parameters to capture image_url natively
             cursor.execute(
                 """
-                INSERT INTO items (title, description, category, status, location, user_id)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                INSERT INTO items (title, description, category, status, location, image_url, user_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """,
-                (title, description, category, status, location, session["user_id"]),
+                (title, description, category, status, location, image_url, session["user_id"]),
             )
             connection.commit()
         finally:
@@ -129,7 +142,6 @@ def view_item(item_id):
 
     cursor = connection.cursor(dictionary=True)
     try:
-        # Fetch item details along with the reporter's username via a JOIN
         cursor.execute(
             """
             SELECT items.*, users.username AS reporter_name 
@@ -148,7 +160,6 @@ def view_item(item_id):
         flash("Item not found.")
         return redirect(url_for("main.dashboard"))
 
-    # Security check passed down to frontend template context
     is_owner = item["user_id"] == session["user_id"]
 
     return render_template("view_item.html", item=item, is_owner=is_owner)
@@ -166,7 +177,6 @@ def reclaim_item(item_id):
 
     cursor = connection.cursor(dictionary=True)
     try:
-        # CRITICAL: Fetch the owner id on the server backend to avoid tamper tricks
         cursor.execute("SELECT user_id FROM items WHERE id = %s", (item_id,))
         item = cursor.fetchone()
 
@@ -174,12 +184,10 @@ def reclaim_item(item_id):
             flash("Item not found.")
             return redirect(url_for("main.dashboard"))
 
-        # SECURE AUTHORIZATION CHECK: Prevent IDOR attempts completely
         if item["user_id"] != session["user_id"]:
             flash("Access denied. You do not own this record.")
             return redirect(url_for("main.dashboard")), 403
 
-        # Update the status to 'claimed' securely
         cursor.execute(
             "UPDATE items SET status = 'claimed' WHERE id = %s",
             (item_id,),

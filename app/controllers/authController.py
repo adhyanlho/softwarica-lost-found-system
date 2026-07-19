@@ -37,7 +37,7 @@ def register():
             cursor.close()
             connection.close()
 
-        flash("Registration successful. Please log in.")
+        flash('Registration successful! Please log in.', 'success')
         return redirect(url_for("auth.login"))
 
     return render_template("register.html")

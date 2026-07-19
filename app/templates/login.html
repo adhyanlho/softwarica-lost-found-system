@@ -11,12 +11,13 @@
                 {% if category == 'success' %}
                     <!-- Green Success Box -->
                     <ul class="flash-alert" style="background-color: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #047857; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; list-style-type: none; padding-left: 16px;">
-                        <li style="font-weight: 500;">✓ {{ message }}</li>
+                        <!-- Changed color from red to green (#047857) here -->
+                        <li style="font-weight: 500; color: #047857;">✓ {{ message }}</li>
                     </ul>
                 {% else %}
                     <!-- Red Error Box -->
                     <ul class="flash-alert" style="background-color: #fee2e2; border: 1px solid #f87171; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; list-style-type: none; padding-left: 16px;">
-                        <li style="font-weight: 500;">⚠️ {{ message }}</li>
+                        <li style="font-weight: 500; color: #991b1b;">⚠️ {{ message }}</li>
                     </ul>
                 {% endif %}
             {% endfor %}

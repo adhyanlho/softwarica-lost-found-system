@@ -28,8 +28,13 @@ def dashboard():
             open_count=0,
         )
 
+    # 1. Capture search input strings and category filters from the GET query parameters
+    search_query = request.args.get("search", "").strip()
+    category_filter = request.args.get("category", "").strip()
+
     cursor = connection.cursor(dictionary=True)
     try:
+        # Fetch logged-in user details
         cursor.execute(
             "SELECT username FROM users WHERE id = %s",
             (user_id,),
@@ -38,15 +43,34 @@ def dashboard():
         if user:
             username = user["username"]
 
-        cursor.execute("SELECT * FROM items ORDER BY created_at DESC")
+        # 2. Fetch global statuses independently so card metrics stay accurate during searches
+        cursor.execute("SELECT status FROM items")
+        stats_data = cursor.fetchall()
+        lost_count = sum(1 for item in stats_data if item["status"] == "lost")
+        found_count = sum(1 for item in stats_data if item["status"] == "found")
+        claimed_count = sum(1 for item in stats_data if item["status"] == "claimed")
+
+        # 3. Construct the dynamic search and filter SQL query
+        query_string = "SELECT * FROM items WHERE 1=1"
+        query_params = []
+
+        if search_query:
+            query_string += " AND (title LIKE %s OR description LIKE %s)"
+            query_params.extend([f"%{search_query}%", f"%{search_query}%"])
+
+        if category_filter and category_filter.lower() != "all":
+            query_string += " AND category = %s"
+            query_params.append(category_filter)
+
+        query_string += " ORDER BY created_at DESC"
+
+        # Execute filtered query
+        cursor.execute(query_string, tuple(query_params))
         items = cursor.fetchall()
+        
     finally:
         cursor.close()
         connection.close()
-
-    lost_count = sum(1 for item in items if item["status"] == "lost")
-    found_count = sum(1 for item in items if item["status"] == "found")
-    claimed_count = sum(1 for item in items if item["status"] == "claimed")
 
     return render_template(
         "dashboard.html",
@@ -56,6 +80,8 @@ def dashboard():
         found_count=found_count,
         claimed_count=claimed_count,
         open_count=lost_count + found_count,
+        search_query=search_query,        # Passed to keep frontend input text sticky
+        category_filter=category_filter   # Passed to keep frontend dropdown sticky
     )
 
 
@@ -89,6 +115,8 @@ def report():
         return redirect(url_for("main.dashboard"))
 
     return render_template("report.html")
+
+
 @main_bp.route("/item/<int:item_id>")
 def view_item(item_id):
     if "user_id" not in session:

@@ -4,106 +4,239 @@
 
 {% block content %}
 <style>
-    .report-container {
-        background: rgba(255, 255, 255, 0.96);
-        color: #1a202c;
-        padding: 2.5rem;
-        border-radius: 12px;
-        max-width: 600px;
-        margin: 2rem auto;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .report-container h1 {
-        margin: 0 0 1.5rem;
-        font-size: 1.75rem;
-        color: #1a202c;
-    }
-
-    .report-field {
-        margin-bottom: 1.25rem;
-    }
-
-    .report-field label {
-        display: block;
-        margin-bottom: 0.4rem;
-        color: #1a202c;
-        font-weight: 700;
-    }
-
-    .report-field input,
-    .report-field select,
-    .report-field textarea {
-        width: 100%;
-        box-sizing: border-box;
-        padding: 0.75rem;
-        border: 1px solid #cbd5e0;
-        border-radius: 8px;
-        color: #1a202c;
-        background: #ffffff;
-        font: inherit;
-    }
-
-    .report-field textarea {
-        resize: vertical;
-    }
-
-    .report-submit {
-        width: 100%;
-        padding: 0.85rem 1rem;
+    main {
+        width: min(800px, calc(100% - 32px));
+        margin: 28px auto 44px;
+        padding: 0;
+        background: transparent;
         border: 0;
-        border-radius: 8px;
-        background: #2563eb;
-        color: #ffffff;
-        font: inherit;
-        font-weight: 700;
-        cursor: pointer;
+        border-radius: 0;
+        box-shadow: none;
     }
 
-    .report-submit:hover {
+    main:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .report-page {
+        display: grid;
+        gap: 22px;
+    }
+
+    .report-panel {
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid rgba(219, 228, 240, 0.95);
+        border-radius: 18px;
+        box-shadow: 0 20px 48px rgba(15, 23, 42, 0.13);
+        padding: 32px;
+    }
+
+    div.report-header {
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 20px;
+        margin-bottom: 28px;
+        background: transparent !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        padding-top: 0 !important;
+    }
+
+    .report-title {
+        margin: 0;
+        color: #111827;
+        font-size: 1.85rem;
+        font-weight: 850;
+        line-height: 1.2;
+    }
+
+    .report-subtitle {
+        color: #475467;
+        font-size: 0.98rem;
+        margin: 8px 0 0 0;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .form-group label {
+        color: #374151;
+        font-size: 0.92rem;
+        font-weight: 750;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        min-height: 48px;
+        padding: 10px 16px;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        color: #111827;
+        font-size: 0.95rem;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+        font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .form-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 14px;
+        margin-top: 12px;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 24px;
+    }
+
+    .btn-submit {
+        background: #2563eb;
+        color: white;
+        border: none;
+        padding: 12px 28px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .btn-submit:hover {
         background: #1d4ed8;
+    }
+
+    .btn-cancel {
+        background: #f1f5f9;
+        color: #475467;
+        border: 1px solid #cbd5e1;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-align: center;
+        transition: background 0.2s ease;
+    }
+
+    .btn-cancel:hover {
+        background: #e2e8f0;
+    }
+
+    @media (max-width: 640px) {
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+        
+        .report-panel {
+            padding: 20px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-submit,
+        .btn-cancel {
+            width: 100%;
+            min-height: 52px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
     }
 </style>
 
-<section class="report-container" aria-label="Report lost or found item">
-    <h1>Report an Item</h1>
+<div class="report-page">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div style="background-color: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #f87171; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-weight: 500;">
+            ⚠️ {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 
-    <form method="POST" action="{{ url_for('main.report') }}">
-        <div class="report-field">
-            <label for="title">Item Name / Title</label>
-            <input id="title" type="text" name="title" required>
+    <div class="report-panel">
+        <div class="report-header">
+            <h1 class="report-title">Report an Item</h1>
+            <p class="report-subtitle">Fill out the details below to log a lost or found item.</p>
         </div>
 
-        <div class="report-field">
-            <label for="category">Category</label>
-            <select id="category" name="category" required>
-                <option value="Electronics">Electronics</option>
-                <option value="Keys">Keys</option>
-                <option value="Wallets & Documents">Wallets &amp; Documents</option>
-                <option value="Clothing">Clothing</option>
-                <option value="Other">Other</option>
-            </select>
-        </div>
+        <form action="{{ url_for('main.report') }}" method="POST" aria-label="Item report form">
+            
+            <div class="form-group">
+                <label for="title">Item Name / Title</label>
+                <input type="text" id="title" name="title" placeholder="e.g., Sony WH-1000XM4 Headphones, Black Wallet" required>
+            </div>
 
-        <div class="report-field">
-            <label for="status">Status</label>
-            <select id="status" name="status" required>
-                <option value="lost">lost</option>
-                <option value="found">found</option>
-            </select>
-        </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" name="category" required>
+                        <option value="" disabled selected>Select a category</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Keys">Keys</option>
+                        <option value="Wallets & Documents">Wallets &amp; Documents</option>
+                        <option value="Clothing">Clothing</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
 
-        <div class="report-field">
-            <label for="location">Location</label>
-            <input id="location" type="text" name="location" placeholder="e.g., Block A Lab 2" required>
-        </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status" name="status" required>
+                        <option value="" disabled selected>Select status</option>
+                        <option value="lost">Lost</option>
+                        <option value="found">Found</option>
+                    </select>
+                </div>
+            </div>
 
-        <div class="report-field">
-            <label for="description">Detailed Description</label>
-            <textarea id="description" name="description" rows="4"></textarea>
-        </div>
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" placeholder="e.g., Block A Lab 2, Cafeteria Counter" required>
+            </div>
 
-        <button class="report-submit" type="submit">Submit Report</button>
-    </form>
-</section>
+            <div class="form-group">
+                <label for="description">Detailed Description</label>
+                <textarea id="description" name="description" rows="4" placeholder="Mention specific identifiers (e.g., serial numbers, stickers, keychains, color marks)..." required></textarea>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('main.dashboard') }}" class="btn-cancel">Cancel</a>
+                <button type="submit" class="btn-submit">Submit Report</button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

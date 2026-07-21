@@ -218,5 +218,6 @@ __marimo__/
 .streamlit/secrets.toml
 
 
-
+# Preserve uploads folder but ignore actual user uploads
 app/static/uploads/*
+!app/static/uploads/.gitkeep

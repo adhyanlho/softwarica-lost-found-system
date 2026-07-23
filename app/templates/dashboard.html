@@ -307,7 +307,51 @@
         color: #1d4ed8;
         font-weight: 850;
     }
+    .pagination-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 24px;
+        border-top: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
 
+    .pagination-info {
+        color: #475467;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .pagination-controls {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-page {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 14px;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        color: #1e293b;
+        font-size: 0.88rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .btn-page:hover:not(.disabled) {
+        background: #2563eb;
+        color: #ffffff;
+        border-color: #2563eb;
+    }
+
+    .btn-page.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
     @media (max-width: 860px) {
         .dashboard-header,
         .dashboard-toolbar,
@@ -425,6 +469,30 @@
             <span>Latest activity from lost and found reports</span>
         </div>
         <div class="table-wrap">
+            {% if total_pages > 1 %}
+            <div class="pagination-wrap">
+                <div class="pagination-info">
+                    Page <strong>{{ page }}</strong> of <strong>{{ total_pages }}</strong> ({{ total_items }} total items)
+                </div>
+                <div class="pagination-controls">
+                    {% if page > 1 %}
+                        <a href="{{ url_for('main.dashboard', page=page-1, search=search_query, category=category_filter) }}" class="btn-page">
+                            ← Previous
+                        </a>
+                    {% else %}
+                        <span class="btn-page disabled">← Previous</span>
+                    {% endif %}
+
+                    {% if page < total_pages %}
+                        <a href="{{ url_for('main.dashboard', page=page+1, search=search_query, category=category_filter) }}" class="btn-page">
+                            Next →
+                        </a>
+                    {% else %}
+                        <span class="btn-page disabled">Next →</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
             <table class="items-table">
                 <thead>
                     <tr>

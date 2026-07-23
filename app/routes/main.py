@@ -1,3 +1,4 @@
+import math
 import os
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from werkzeug.utils import secure_filename
@@ -18,6 +19,10 @@ def dashboard():
     is_admin = False
     items = []
 
+    # Pagination parameters
+    page = request.args.get("page", 1, type=int)
+    per_page = 5  # Adjust how many items per page you want to show
+
     connection = get_connection()
     if connection is None:
         flash("Database connection failed. Please try again.")
@@ -31,6 +36,8 @@ def dashboard():
             found_count=0,
             claimed_count=0,
             open_count=0,
+            page=1,
+            total_pages=1,
         )
 
     search_query = request.args.get("search", "").strip()
@@ -38,7 +45,7 @@ def dashboard():
 
     cursor = connection.cursor(dictionary=True)
     try:
-        # Fetch username and role from database
+        # Fetch username and role
         cursor.execute(
             "SELECT username, role FROM users WHERE id = %s",
             (user_id,),
@@ -50,31 +57,44 @@ def dashboard():
 
         is_admin = (user_role == "admin")
 
+        # Top metric statistics
         cursor.execute("SELECT status FROM items")
         stats_data = cursor.fetchall()
         lost_count = sum(1 for item in stats_data if item["status"] == "lost")
         found_count = sum(1 for item in stats_data if item["status"] == "found")
         claimed_count = sum(1 for item in stats_data if item["status"] == "claimed")
 
-        # Admin sees all items; standard users see approved items OR items they uploaded themselves
-        query_params = []
-        if is_admin:
-            query_string = "SELECT * FROM items WHERE 1=1"
-        else:
-            query_string = "SELECT * FROM items WHERE (is_approved = 1 OR user_id = %s)"
-            query_params.append(user_id)
+        # Build WHERE clause dynamically based on user role and filters
+        where_conditions = []
+        where_params = []
+
+        if not is_admin:
+            where_conditions.append("(is_approved = 1 OR user_id = %s)")
+            where_params.append(user_id)
 
         if search_query:
-            query_string += " AND (title LIKE %s OR description LIKE %s)"
-            query_params.extend([f"%{search_query}%", f"%{search_query}%"])
+            where_conditions.append("(title LIKE %s OR description LIKE %s)")
+            where_params.extend([f"%{search_query}%", f"%{search_query}%"])
 
         if category_filter and category_filter.lower() != "all":
-            query_string += " AND category = %s"
-            query_params.append(category_filter)
+            where_conditions.append("category = %s")
+            where_params.append(category_filter)
 
-        query_string += " ORDER BY created_at DESC"
+        where_clause = " WHERE " + " AND ".join(where_conditions) if where_conditions else ""
 
-        cursor.execute(query_string, tuple(query_params))
+        # 1. Get total count of matching items
+        count_query = f"SELECT COUNT(*) AS total FROM items{where_clause}"
+        cursor.execute(count_query, tuple(where_params))
+        total_items = cursor.fetchone()["total"]
+
+        total_pages = math.ceil(total_items / per_page) if total_items > 0 else 1
+        page = max(1, min(page, total_pages))  # Clamp page between 1 and total_pages
+        offset = (page - 1) * per_page
+
+        # 2. Fetch paginated records
+        items_query = f"SELECT * FROM items{where_clause} ORDER BY created_at DESC LIMIT %s OFFSET %s"
+        query_params = where_params + [per_page, offset]
+        cursor.execute(items_query, tuple(query_params))
         items = cursor.fetchall()
 
     finally:
@@ -93,6 +113,9 @@ def dashboard():
         open_count=lost_count + found_count,
         search_query=search_query,
         category_filter=category_filter,
+        page=page,
+        total_pages=total_pages,
+        total_items=total_items,
     )
 
 

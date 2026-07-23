@@ -11,7 +11,6 @@
                 {% if category == 'success' %}
                     <!-- Green Success Box -->
                     <ul class="flash-alert" style="background-color: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #047857; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; list-style-type: none; padding-left: 16px;">
-                        <!-- Changed color from red to green (#047857) here -->
                         <li style="font-weight: 500; color: #047857;">✓ {{ message }}</li>
                     </ul>
                 {% else %}
@@ -27,16 +26,50 @@
     <form method="POST" action="{{ url_for('auth.login') }}">
         <div>
             <label>Username:</label>
-            <input type="text" name="username" required>
+            <input type="text" name="username" required style="width: 100%; box-sizing: border-box;">
         </div>
         <br>
         <div>
             <label>Password:</label>
-            <input type="password" name="password" required>
+            <div style="position: relative; display: flex; align-items: center; width: 100%;">
+                <input type="password" id="password" name="password" required style="width: 100%; padding-right: 40px; box-sizing: border-box;">
+                <button type="button" id="togglePassword" style="position: absolute; right: 8px; background: none; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; color: #6b7280;">
+                    <!-- Eye Icon (Open) -->
+                    <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                </button>
+            </div>
         </div>
         <br>
         <button type="submit">Log In</button>
     </form>
     <br>
     <p>Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a>.</p>
+
+    <script>
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        togglePassword.addEventListener('click', function () {
+            const isPassword = passwordInput.getAttribute('type') === 'password';
+            passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+            
+            if (isPassword) {
+                // Change icon to Eye Slash (Hidden state)
+                eyeIcon.innerHTML = `
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                `;
+            } else {
+                // Change icon back to Normal Eye (Visible state)
+                eyeIcon.innerHTML = `
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                `;
+            }
+        });
+    </script>
 {% endblock %}

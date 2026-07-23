@@ -199,6 +199,7 @@
 
         <!-- Added enctype="multipart/form-data" to support standard file stream parsing blocks -->
         <form action="{{ url_for('main.report') }}" method="POST" enctype="multipart/form-data" aria-label="Item report form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             
             <div class="form-group">
                 <label for="title">Item Name / Title</label>

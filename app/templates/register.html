@@ -24,6 +24,7 @@
     {% endwith %}
 
     <form method="POST" action="{{ url_for('auth.register') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div>
             <label>Username:</label>
             <input type="text" name="username" required style="width: 100%; box-sizing: border-box;">

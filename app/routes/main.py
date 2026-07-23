@@ -14,6 +14,8 @@ def dashboard():
 
     user_id = session.get("user_id")
     username = "User"
+    user_role = "user"
+    is_admin = False
     items = []
 
     connection = get_connection()
@@ -22,6 +24,8 @@ def dashboard():
         return render_template(
             "dashboard.html",
             username=username,
+            user_role=user_role,
+            is_admin=False,
             items=items,
             lost_count=0,
             found_count=0,
@@ -34,13 +38,17 @@ def dashboard():
 
     cursor = connection.cursor(dictionary=True)
     try:
+        # Fetch username and role from database
         cursor.execute(
-            "SELECT username FROM users WHERE id = %s",
+            "SELECT username, role FROM users WHERE id = %s",
             (user_id,),
         )
         user = cursor.fetchone()
         if user:
-            username = user["username"]
+            username = user.get("username", "User")
+            user_role = str(user.get("role", "user")).strip().lower()
+
+        is_admin = (user_role == "admin")
 
         cursor.execute("SELECT status FROM items")
         stats_data = cursor.fetchall()
@@ -48,8 +56,13 @@ def dashboard():
         found_count = sum(1 for item in stats_data if item["status"] == "found")
         claimed_count = sum(1 for item in stats_data if item["status"] == "claimed")
 
-        query_string = "SELECT * FROM items WHERE 1=1"
+        # Admin sees all items; standard users see approved items OR items they uploaded themselves
         query_params = []
+        if is_admin:
+            query_string = "SELECT * FROM items WHERE 1=1"
+        else:
+            query_string = "SELECT * FROM items WHERE (is_approved = 1 OR user_id = %s)"
+            query_params.append(user_id)
 
         if search_query:
             query_string += " AND (title LIKE %s OR description LIKE %s)"
@@ -63,7 +76,7 @@ def dashboard():
 
         cursor.execute(query_string, tuple(query_params))
         items = cursor.fetchall()
-        
+
     finally:
         cursor.close()
         connection.close()
@@ -71,13 +84,15 @@ def dashboard():
     return render_template(
         "dashboard.html",
         username=username,
+        user_role=user_role,
+        is_admin=is_admin,
         items=items,
         lost_count=lost_count,
         found_count=found_count,
         claimed_count=claimed_count,
         open_count=lost_count + found_count,
         search_query=search_query,
-        category_filter=category_filter
+        category_filter=category_filter,
     )
 
 
@@ -92,35 +107,37 @@ def report():
         category = request.form.get("category")
         status = request.form.get("status")
         location = request.form.get("location")
-        
-        # 1. Capture the uploaded file object from the form payload
+
         image_file = request.files.get("image")
         image_url = None
 
         if image_file and image_file.filename != "":
             filename = secure_filename(image_file.filename)
-            
-            # Ensure the target static media uploads directory exists
+
             upload_dir = os.path.join("app", "static", "uploads")
             if not os.path.exists(upload_dir):
                 os.makedirs(upload_dir)
-            
-            # Save raw bytes securely onto system disk storage
+
             image_file.save(os.path.join(upload_dir, filename))
             image_url = f"uploads/{filename}"
 
         connection = get_connection()
+        if connection is None:
+            flash("Database connection failed.")
+            return redirect(url_for("main.dashboard"))
+
         cursor = connection.cursor()
         try:
-            # 2. Updated INSERT parameters to capture image_url natively
+            # Set is_approved to 0 so new reports require admin moderation
             cursor.execute(
                 """
-                INSERT INTO items (title, description, category, status, location, image_url, user_id)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO items (title, description, category, status, location, image_url, user_id, is_approved)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, 0)
                 """,
                 (title, description, category, status, location, image_url, session["user_id"]),
             )
             connection.commit()
+            flash("Item reported successfully! Pending admin approval.")
         finally:
             cursor.close()
             connection.close()
@@ -194,6 +211,62 @@ def reclaim_item(item_id):
         )
         connection.commit()
         flash("Item successfully updated to Reclaimed!")
+    finally:
+        cursor.close()
+        connection.close()
+
+    return redirect(url_for("main.dashboard"))
+
+
+@main_bp.route("/admin/approve/<int:item_id>", methods=["POST"])
+def approve_item(item_id):
+    if "user_id" not in session:
+        return redirect(url_for("auth.login"))
+
+    connection = get_connection()
+    if connection is None:
+        flash("Database connection error.")
+        return redirect(url_for("main.dashboard"))
+
+    cursor = connection.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT role FROM users WHERE id = %s", (session["user_id"],))
+        user = cursor.fetchone()
+        if not user or str(user.get("role", "")).strip().lower() != "admin":
+            flash("Access denied. Admin privileges required.", "error")
+            return redirect(url_for("main.dashboard")), 403
+
+        cursor.execute("UPDATE items SET is_approved = 1 WHERE id = %s", (item_id,))
+        connection.commit()
+        flash("Item approved and published successfully!", "success")
+    finally:
+        cursor.close()
+        connection.close()
+
+    return redirect(url_for("main.dashboard"))
+
+
+@main_bp.route("/admin/delete/<int:item_id>", methods=["POST"])
+def delete_item(item_id):
+    if "user_id" not in session:
+        return redirect(url_for("auth.login"))
+
+    connection = get_connection()
+    if connection is None:
+        flash("Database connection error.")
+        return redirect(url_for("main.dashboard"))
+
+    cursor = connection.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT role FROM users WHERE id = %s", (session["user_id"],))
+        user = cursor.fetchone()
+        if not user or str(user.get("role", "")).strip().lower() != "admin":
+            flash("Access denied. Admin privileges required.", "error")
+            return redirect(url_for("main.dashboard")), 403
+
+        cursor.execute("DELETE FROM items WHERE id = %s", (item_id,))
+        connection.commit()
+        flash("Item removed successfully.", "success")
     finally:
         cursor.close()
         connection.close()

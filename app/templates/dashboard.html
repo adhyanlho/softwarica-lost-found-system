@@ -407,6 +407,7 @@
             <option value="Clothing" {% if category_filter == 'Clothing' %}selected{% endif %}>Clothing</option>
             <option value="Books" {% if category_filter == 'Books' %}selected{% endif %}>Books & Documents</option>
             <option value="Keys" {% if category_filter == 'Keys' %}selected{% endif %}>Keys & Essentials</option>
+            <option value="Other" {% if category_filter == 'Other' %}selected{% endif %}>Other</option>
         </select>
 
         <button type="submit" class="report-button btn-filter">🔍 Filter</button>
@@ -440,8 +441,33 @@
                         <td class="item-name">{{ item.title }}</td>
                         <td>{{ item.category }}</td>
                         <td>{{ item.created_at.strftime('%b %d, %Y') if item.created_at else 'Recent' }}</td>
-                        <td><span class="status-badge {{ item.status }}">{{ item.status | capitalize }}</span></td>
-                        <td><a href="{{ url_for('main.view_item', item_id=item.id) }}" class="btn-view">View</a></td>
+                        <td>
+                            <span class="status-badge {{ item.status }}">{{ item.status | capitalize }}</span>
+                            {% if item.is_approved == 0 %}
+                                <span style="background-color: #f59e0b; color: white; padding: 2px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 800; display: inline-block; margin-left: 4px;">
+                                    ⏳ Pending
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td style="display: flex; align-items: center; gap: 8px;">
+                            <a href="{{ url_for('main.view_item', item_id=item.id) }}" class="btn-view">View</a>
+
+                            {% if is_admin %}
+                                {% if item.is_approved == 0 %}
+                                    <form action="{{ url_for('main.approve_item', item_id=item.id) }}" method="POST" style="display: inline; margin: 0;">
+                                        <button type="submit" style="background: #10b981; color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; cursor: pointer;">
+                                            ✓ Approve
+                                        </button>
+                                    </form>
+                                {% endif %}
+
+                                <form action="{{ url_for('main.delete_item', item_id=item.id) }}" method="POST" onsubmit="return confirm('Delete this post?');" style="display: inline; margin: 0;">
+                                    <button type="submit" style="background: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; cursor: pointer;">
+                                        🗑 Delete
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                     {% if not items %}

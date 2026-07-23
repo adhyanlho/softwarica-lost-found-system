@@ -234,9 +234,18 @@
             </div>
 
             <!-- New Image Upload Selector Field Element Component -->
+            <!-- Image Upload Selector Field Element Component -->
             <div class="form-group">
-                <label for="image">Item Photo (Optional)</label>
-                <input type="file" id="image" name="image" accept="image/*">
+                <label for="image">
+                    Item Photo (Optional)
+                    <span style="font-size: 0.8rem; color: #64748b; font-weight: normal; margin-left: 6px;">
+                        (Max size: 5 MB)
+                    </span>
+                </label>
+                <input type="file" id="imageInput" name="image" accept="image/*" />
+                <small id="fileHelp" style="display: block; color: #64748b; font-size: 0.82rem; margin-top: 2px;">
+                    Supported formats: PNG, JPG, JPEG, GIF, WEBP (Maximum size: 5 MB)
+                </small>
             </div>
 
             <div class="form-group">
@@ -251,4 +260,18 @@
         </form>
     </div>
 </div>
+<script>
+document.getElementById('imageInput').addEventListener('change', function() {
+    const file = this.files[0];
+    if (file) {
+        // 5 MB in bytes = 5 * 1024 * 1024 = 5242880 bytes
+        const maxSizeInBytes = 5 * 1024 * 1024;
+        
+        if (file.size > maxSizeInBytes) {
+            alert('File size exceeds 5 MB! Please select a smaller image.');
+            this.value = ''; // Clear the selected file input
+        }
+    }
+});
+</script>
 {% endblock %}

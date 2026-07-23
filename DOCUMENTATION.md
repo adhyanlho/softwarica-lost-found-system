@@ -13,7 +13,7 @@ The application follows a modular MVC (Model-View-Controller) structure powered 
 Automated unit tests cover happy path routing, database handshakes, unauthorized URL access, and invalid input submissions. Custom 404 and 500 error handlers guarantee graceful fallback behavior across all failure scenarios.
 
 
-### 4. Entity-Relationship Diagram (ERD)
+## 4. Entity-Relationship Diagram (ERD)
 ```
 +-----------------------------------+         +-----------------------------------+
 |               USERS               |         |               ITEMS               |
@@ -129,7 +129,7 @@ The system utilizes a 1-to-Many (1:N) relational database model between `users` 
 |               | run.py                                      |                                                                                                   |
 +---------------+---------------------------------------------+---------------------------------------------------------------------------------------------------+
 ```
-### 🧪 Phase 4: Defect Log & Testing Matrix
+## 🧪 Defect Log & Testing Matrix
 ### 1. Defect Log Matrix
 ```
 +-----------+-----------------+------------------------------------------------------------------------------------+----------+----------+-----------------------------------------------------------------------------------+
@@ -150,4 +150,32 @@ The system utilizes a 1-to-Many (1:N) relational database model between `users` 
 | TC-003       | Item Reporting  | Fill lost item form with title, category, location, submit | Item successfully saved to DB and displayed on dashboard.   | PASS        |
 | TC-004       | Search / Filter | Type query into search bar on dashboard                    | Dashboard dynamically filters items matching title/category. | PASS        |
 +--------------+-----------------+------------------------------------------------------------+-------------------------------------------------------------+-------------+
+```
+## Screenshot Evidence & Report Outline
+
+### 5.1 Screenshot Evidence Checklist
+```
++------------------+----------------------------------+-----------------------------------------------------------------------+
+| Screenshot #     | Screen / View                    | Action to Capture                                                     |
++------------------+----------------------------------+-----------------------------------------------------------------------+
+| Screenshot 01    | Login / Auth Page                | The /login page with form fields visible.                             |
+| Screenshot 02    | Main Dashboard                   | The / route showing lost & found item cards and search bar.           |
+| Screenshot 03    | Report Item Form                 | The /report page with populated title, category, and location.        |
+| Screenshot 04    | Database Verification            | Your terminal or phpMyAdmin/MySQL workbench showing rows in items.    |
+| Screenshot 05    | Git Repository History           | Terminal running git log --oneline -n 10 showing your commit flow.    |
++------------------+----------------------------------+-----------------------------------------------------------------------+
+```
+### 5.2 Final Word Report Structure Outline
+```
++----------------------------------+-----------------------------------------------------------------------------------+
+| SECTION                          | CONTENT TO INCLUDE                                                                |
++----------------------------------+-----------------------------------------------------------------------------------+
+| 1. Cover Page                    | Project Title, Student Name, Student ID, Softwarica Module Name & Submission Date  |
+| 2. Executive Summary / Intro     | Problem statement, project objectives, tech stack (Flask, MySQL, Jinja2, Bootstrap)|
+| 3. System Requirements           | Functional vs. Non-Functional requirements list                                   |
+| 4. System Architecture           | ERD Diagram (3.1), DFD Level 0 & 1 (3.2), MVC Architecture Table (3.3)             |
+| 5. Testing & Defect Log          | Defect Log Matrix (4.1), Functional Test Cases (4.2)                               |
+| 6. Implementation Screenshots    | Paste your 5 captured screenshots with brief captions                             |
+| 7. Conclusion & Future Scope     | Summary of completed features, future enhancements (e.g., email notifications)     |
++----------------------------------+-----------------------------------------------------------------------------------+
 ```

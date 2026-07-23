@@ -1,3 +1,4 @@
+from app.extensions import limiter
 from flask import Flask, flash, redirect, session, url_for
 from flask_wtf.csrf import CSRFProtect
 from config import Config
@@ -7,8 +8,9 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # 1. Initialize Global CSRF Protection
+    # Initialize Global CSRF Protection & Rate Limiter
     csrf = CSRFProtect(app)
+    limiter.init_app(app)
 
     # Set 5 MB maximum file upload limit
     app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024

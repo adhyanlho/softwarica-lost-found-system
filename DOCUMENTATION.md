@@ -129,3 +129,25 @@ The system utilizes a 1-to-Many (1:N) relational database model between `users` 
 |               | run.py                                      |                                                                                                   |
 +---------------+---------------------------------------------+---------------------------------------------------------------------------------------------------+
 ```
+### 🧪 Phase 4: Defect Log & Testing Matrix
+### 1. Defect Log Matrix
+```
++-----------+-----------------+------------------------------------------------------------------------------------+----------+----------+-----------------------------------------------------------------------------------+
+| Defect ID | Module          | Issue Description                                                                  | Severity | Status   | Fix Applied                                                                       |
++-----------+-----------------+------------------------------------------------------------------------------------+----------+----------+-----------------------------------------------------------------------------------+
+| DEF-001   | Database / Auth | seed.sql contained plain-text passwords, causing login failures with Werkzeug.     | High     | Resolved | Updated seed.sql to generate valid scrypt password hashes matching schema.        |
+| DEF-002   | Middleware      | Direct URL navigation to /report without active session threw unhandled 500.     | Medium   | Resolved | Added @login_required decorator to redirect unauthenticated users to /login.       |
+| DEF-003   | UI / View       | Missing image file path in item post caused broken img tags on dashboard.          | Low      | Resolved | Added default fallback placeholder image in Jinja2 (item.image_url or default).   |
++-----------+-----------------+------------------------------------------------------------------------------------+----------+----------+-----------------------------------------------------------------------------------+
+```
+### 2. Functional Test Cases
+```
++--------------+-----------------+------------------------------------------------------------+-------------------------------------------------------------+-------------+
+| Test Case ID | Feature         | Input / Action                                             | Expected Result                                             | Pass / Fail |
++--------------+-----------------+------------------------------------------------------------+-------------------------------------------------------------+-------------+
+| TC-001       | User Login      | Submit valid credentials (admin@softwarica.edu.np)         | Redirects to dashboard with active session banner.          | PASS        |
+| TC-002       | User Login      | Submit invalid password                                    | Displays error alert: "Invalid email or password."          | PASS        |
+| TC-003       | Item Reporting  | Fill lost item form with title, category, location, submit | Item successfully saved to DB and displayed on dashboard.   | PASS        |
+| TC-004       | Search / Filter | Type query into search bar on dashboard                    | Dashboard dynamically filters items matching title/category. | PASS        |
++--------------+-----------------+------------------------------------------------------------+-------------------------------------------------------------+-------------+
+```
